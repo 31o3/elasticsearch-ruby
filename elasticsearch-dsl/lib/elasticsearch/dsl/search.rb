@@ -135,6 +135,29 @@ module Elasticsearch
           @aggregations = value
         end
 
+        # DSL method for building the `collapse` part of a search definition
+        #
+        # @return [self]
+        #
+        def collapse(*args, &block)
+          case
+          when block
+            @collapse = Collapse.new(*args, &block)
+            self
+          when !args.empty?
+            @collapse = args.first
+            self
+          else
+            @collapse
+          end
+        end
+
+        # Set the collapse part of a search definition
+        #
+        def collapse=(value)
+          @collapse = value
+        end
+
         # DSL method for building the `highlight` part of a search definition
         #
         # @return [self]
@@ -242,6 +265,7 @@ module Elasticsearch
           hash.update(filter: @filter.to_hash) if @filter
           hash.update(post_filter: @post_filter.to_hash) if @post_filter
           hash.update(aggregations: @aggregations.reduce({}) { |sum,item| sum.update item.first => item.last.to_hash }) if @aggregations
+          hash.update(collapse: @collapse.to_hash[:collapse]) if @collapse
           hash.update(sort: @sort.to_hash) if @sort
           hash.update(size: @size) if @size
           hash.update(stored_fields: @stored_fields) if @stored_fields
